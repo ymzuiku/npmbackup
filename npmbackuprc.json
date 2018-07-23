@@ -1,0 +1,10 @@
+{
+  "to": "~/Library/Mobile Documents/com~apple~CloudDocs/npmbackup/",
+  "libs": [
+    "~/npmbackuprc.json",
+    "~/.zshrc",
+    "~/.bash_profile",
+    "~/.vimrc",
+    "~/.vim"
+  ]
+}
