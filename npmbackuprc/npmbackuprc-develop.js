@@ -1,6 +1,6 @@
 module.exports = {
   /*
-    to: backup path, if you use iCloud, set 
+    to: backup path
     libs: need copy files or dirs | 需要拷贝的文件或文件夹
     ignores: ignore files or dirs | 需要忽略拷贝的文件夹或文件夹
 
