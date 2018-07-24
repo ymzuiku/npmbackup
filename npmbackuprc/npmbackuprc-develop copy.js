@@ -6,10 +6,12 @@ module.exports = {
 
     if you use iCloud, set
     to: ~/Library/Mobile Documents/com~apple~CloudDocs/npmbackup/
+    
   */
 
-  to: '~/Desktop/npmbackupFiles',
+  to: '/Volumes/movedisk/npmbackup',
   libs: [
+    '~/work',
     '~/npmbackuprc.json',
     '~/.bash_profile',
     '~/.vimrc',
@@ -46,6 +48,11 @@ module.exports = {
     '*/.Spotlight-V100/',
     '*/.Trashes/',
     '*/node_modules/',
+    '*/build/',
+    '*/.cache/',
+    '*/.dist/',
+    '*/dev-web/',
+    '*/dev-wechat/',
     '*/.DS_Store',
     '*/._.*',
     '*/ffs_log',

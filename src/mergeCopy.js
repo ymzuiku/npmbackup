@@ -1,27 +1,15 @@
 const fse = require('fs-extra');
 const path = require('path');
+const md5 = require('blueimp-md5');
+const options = require('./options');
 
 let allDirIgnores = [];
 let allFileIgnores = [];
 let rootDirIgnores = [];
 let rootFileIgnores = [];
-let saveIslogcopyfile;
-let saveDirIgnoreSlash;
 let rootPath;
 
-function mergeCopy({
-  fromPath = '',
-  toPath = '',
-  ignores,
-  isLogCopyFile,
-  dirIgnoreSlash,
-}) {
-  // save options
-  if (saveIslogcopyfile === undefined) {
-    saveIslogcopyfile = isLogCopyFile;
-    saveDirIgnoreSlash = dirIgnoreSlash;
-    rootPath = fromPath;
-  }
+function mergeCopy({ fromPath = '', toPath = '', ignores }) {
   if (ignores) {
     for (let i = 0, l = ignores.length; i < l; i++) {
       let ele = ignores[i] || '';
@@ -44,7 +32,7 @@ function mergeCopy({
         } else {
           ele = ele.replace('*/', '');
           allFileIgnores.push(ele);
-          if (saveDirIgnoreSlash) {
+          if (options.dirIgnoreSlash) {
             allDirIgnores.push(ele);
           }
         }
@@ -54,7 +42,7 @@ function mergeCopy({
           rootDirIgnores.push(ele);
         } else {
           rootFileIgnores.push(ele);
-          if (saveDirIgnoreSlash) {
+          if (options.dirIgnoreSlash) {
             rootDirIgnores.push(ele);
           }
         }
@@ -62,14 +50,15 @@ function mergeCopy({
     }
   }
 
-  let fromStat, toStat;
+  let fromStat = null;
+  let toStat = null;
   if (fse.existsSync(fromPath)) {
     fromStat = fse.lstatSync(fromPath);
   }
   if (fse.existsSync(toPath)) {
     toStat = fse.lstatSync(toPath);
   }
-  if (isChangeNeedCopy(fromStat, toStat)) {
+  if (isChangeNeedCopy(fromStat, toStat, fromPath, toPath)) {
     const isRootDir = path.dirname(fromPath) === rootPath;
     if (fromStat.isDirectory()) {
       const checkIgnores = isRootDir ? rootDirIgnores : allDirIgnores;
@@ -94,7 +83,7 @@ function mergeCopy({
     } else if (fromStat.isFile()) {
       const checkIgnores = isRootDir ? rootFileIgnores : allFileIgnores;
       if (isNeedIgnore(checkIgnores, fromPath) === false) {
-        if (saveIslogcopyfile === true) {
+        if (options.isLogCopyFile === true) {
           console.log(fromPath);
         }
         fse.ensureDirSync(path.dirname(toPath));
@@ -121,16 +110,28 @@ function isNeedIgnore(checkIgnores, fromPath) {
   return isNeedIgnore;
 }
 
-function isChangeNeedCopy(fromStat, toStat) {
+function isChangeNeedCopy(
+  fromStat = new fse.Stats(),
+  toStat = new fse.Stats(),
+  fromPath = '',
+  toPath = '',
+) {
   let needCopy = false;
   if (fromStat) {
     if (fromStat.isDirectory()) {
       needCopy = true;
-    }
-    if (!toStat) {
+    } else if (!toStat) {
       needCopy = true;
     } else if (fromStat.ctimeMs > toStat.ctimeMs) {
-      needCopy = true;
+      if (options.useMd5) {
+        if (fromStat.isFile()) {
+          let fromData = fse.readFileSync(fromPath);
+          let toData = fse.readFileSync(toPath);
+          needCopy = md5(fromData) !== md5(toData);
+        }
+      } else {
+        needCopy = true;
+      }
     }
   }
   return needCopy;

@@ -86,8 +86,6 @@ function doSave(val) {
         fromPath,
         toPath,
         ignores,
-        isLogCopyFile: options.isLogCopyFile,
-        dirIgnoreSlash: options.dirIgnoreSlash,
       });
     });
   };
@@ -102,8 +100,6 @@ function doLoad(val) {
         fromPath: toPath,
         toPath: fromPath,
         ignores,
-        isLogCopyFile: options.isLogCopyFile,
-        dirIgnoreSlash: options.dirIgnoreSlash,
       });
     });
   };

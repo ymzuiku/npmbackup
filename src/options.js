@@ -11,6 +11,7 @@ const options = {
   isLogCopyFile: true,
   error: undefined,
   dirIgnoreSlash: true,
+  useMd5: true,
 };
 
 module.exports = options;
