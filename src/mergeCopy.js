@@ -3,7 +3,6 @@ const path = require('path');
 
 function mergeCopy({ fromPath, toPath, ignores }) {
   let fromStat, toStat, needCopy;
-  console.log(fromPath, toPath);
   if (fse.existsSync(fromPath)) {
     fromStat = fse.lstatSync(fromPath);
   }
@@ -14,6 +13,7 @@ function mergeCopy({ fromPath, toPath, ignores }) {
       isDirectory: false,
     };
   }
+  console.log('fromStat', fromPath, fromStat);
   if (fromStat) {
     if (!toStat) {
       needCopy = true;
@@ -24,16 +24,20 @@ function mergeCopy({ fromPath, toPath, ignores }) {
       needCopy = true;
     }
   }
+  console.log(needCopy);
   if (needCopy) {
     if (fromStat.isDirectory) {
+      console.log('is dir');
       const files = fse.readdirSync(fromPath, 'utf8');
       for (let i = 0, l = files.length; i < l; i++) {
         const ele = files[i];
-        mergeCopy(ele, toPath + '/' + ele);
+        console.log(fromPath + ele, toPath + ele);
+        mergeCopy(fromPath + ele, toPath + ele);
       }
     } else {
-      fse.copyFileSync(fromPath, toPath);
+      console.log(',,', 'no dir');
       console.log('copyTo: ', toPath);
+      fse.copyFileSync(fromPath, toPath);
     }
   }
 }
