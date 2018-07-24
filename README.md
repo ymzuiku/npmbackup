@@ -22,7 +22,7 @@ $ npmbackup init sample
 $ npmbackup init all
 ```
 ### **编辑需要备份的文件**
-打开 `~/nombackup.json` ，添加自己需要的文件，和指定备份的路径(默认路径设置在 `iCloud/npmbackup` )
+打开 `~/nombackup.js` ，添加自己需要的文件，和指定备份的路径(默认路径设置在 `iCloud/npmbackup` )
 
 ### **备份**
 ```shell

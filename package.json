@@ -12,7 +12,6 @@
     "ramda": "^0.25.0"
   },
   "bin": {
-    "npmbackup": "index.js",
-    "backup": "index.js"
+    "npmbackup": "src/index.js"
   }
 }
