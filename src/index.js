@@ -48,9 +48,9 @@ for (let i = 0, l = argv.length; i < l; i++) {
 if (options.error) {
   console.warn(options.error);
 } else {
-  console.time('Sync files...')
+  console.time('Done')
+  console.log('Sync files...')
   realFunc.doLoad();
   realFunc.doSave();
-  console.timeEnd('Sync files...')
-  console.log(`Done!`);
+  console.timeEnd(`Done`);
 }

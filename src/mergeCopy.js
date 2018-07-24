@@ -123,7 +123,12 @@ function isChangeNeedCopy(
     } else if (!toStat) {
       needCopy = true;
     } else if (fromStat.ctimeMs > toStat.ctimeMs) {
-      if (options.useMd5) {
+      // 这里补充用尺寸判断,大于某个尺寸的文件直接用尺寸,否则用md5
+      if (fromStat.size > 99) {
+        if (fromStat.size !== toStat.size) {
+          needCopy = true;
+        }
+      } else if (options.useMd5) {
         if (fromStat.isFile()) {
           let fromData = fse.readFileSync(fromPath);
           let toData = fse.readFileSync(toPath);
