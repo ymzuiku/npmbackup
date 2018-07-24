@@ -6,9 +6,11 @@
  */
 
 const options = {
-  tag: 'default',
-  isUseSource: false,
+  tag: 'default-tag',
+  isUseDevelop: false,
+  isLogCopyFile: true,
   error: undefined,
+  dirIgnoreSlash: true,
 };
 
 module.exports = options;

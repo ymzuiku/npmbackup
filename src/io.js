@@ -20,18 +20,21 @@ const realFunc = {
 let isHas = fse.pathExistsSync(homedir + '/' + '/npmbackuprc.js');
 if (!isHas) {
   fse.copySync(
-    __dirname + '/npmbackuprc.js',
+    path.resolve(__dirname, '../npmbackuprc.js'),
     homedir + '/' + '/npmbackuprc.js',
   );
 }
 
 function loadBackuprc() {
   let rcUrl = homedir + '/' + '/npmbackuprc.js';
-  if (options.isUseSource) {
-    rcUrl = path.resolve(__dirname, '../npmbackuprc-all.js');
+  if (options.isUseDevelop) {
+    rcUrl = path.resolve(__dirname, '../npmbackuprc/npmbackuprc-develop.js');
   }
   let { to, libs, ignores } = require(rcUrl);
   to = to.replace('~', homedir);
+  if (to.charAt(to.length - 1) !== '/') {
+    to += '/';
+  }
   for (let i = 0, l = libs.length; i < l; i++) {
     libs[i] = libs[i].replace('~', homedir);
   }
@@ -43,22 +46,35 @@ function loadBackuprc() {
 
 function getPaths(val = '', to) {
   let fromPath = val;
-  let toPath = to + options.tag + fromPath;
+  let toSubPath = fromPath.replace(homedir, '~');
+  if (toSubPath.charAt(0) !== '/') {
+    toSubPath = '/' + toSubPath;
+  }
+  let toPath = to + options.tag + toSubPath;
   return { fromPath, toPath };
 }
 
 function doInit(val) {
-  if (val === 'all') {
+  if (val === 'develop' || val === 'd') {
     fse.copySync(
-      __dirname + '/npmbackuprc-all.js',
+      path.resolve(__dirname, '../npmbackuprc/npmbackuprc-develop.js'),
       homedir + '/' + '/npmbackuprc.js',
     );
+    console.log(`Use develop config...`);
+  } else if (val === 'clear') {
+    fse.copySync(
+      path.resolve(__dirname, '../npmbackuprc/npmbackuprc-clear.js'),
+      homedir + '/' + '/npmbackuprc.js',
+    );
+    console.log(`Use clear config...`);
   } else {
     fse.copySync(
-      __dirname + '/npmbackuprc.js',
+      path.resolve(__dirname, '../npmbackuprc/npmbackuprc-default.js'),
       homedir + '/' + '/npmbackuprc.js',
     );
+    console.log(`Use default config...`);
   }
+  console.log(`Create file in "~/npmbackuprc.js" , please edit it.`);
 }
 
 function doSave(val) {
@@ -70,6 +86,8 @@ function doSave(val) {
         fromPath,
         toPath,
         ignores,
+        isLogCopyFile: options.isLogCopyFile,
+        dirIgnoreSlash: options.dirIgnoreSlash,
       });
     });
   };
@@ -81,9 +99,11 @@ function doLoad(val) {
     libs.map(v => {
       let { fromPath, toPath } = getPaths(v, to);
       mergeCopy({
-        toPath,
-        fromPath,
+        fromPath: toPath,
+        toPath: fromPath,
         ignores,
+        isLogCopyFile: options.isLogCopyFile,
+        dirIgnoreSlash: options.dirIgnoreSlash,
       });
     });
   };

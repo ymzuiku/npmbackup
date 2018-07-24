@@ -15,10 +15,13 @@ for (let i = 0, l = argv.length; i < l; i++) {
   const ele = argv[i];
   // config
   if (ele === '-s' || ele === '--source') {
-    options.isUseSource = true;
+    options.isUseDevelop = true;
   }
   if (ele === '-v' || ele === '--version') {
     console.log(package.version);
+  }
+  if (ele === '-h' || ele === '--hidden-log') {
+    options.isLogCopyFile = false;
   }
   if (ele === '-t' || ele === '--tag') {
     if (argv.length >= i + 1) {
@@ -45,8 +48,9 @@ for (let i = 0, l = argv.length; i < l; i++) {
 if (options.error) {
   console.warn(options.error);
 } else {
-  console.log(`Start...`);
+  console.time('Sync files...')
   realFunc.doLoad();
   realFunc.doSave();
+  console.timeEnd('Sync files...')
   console.log(`Done!`);
 }
