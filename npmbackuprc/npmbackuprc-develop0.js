@@ -1,16 +1,17 @@
 module.exports = {
   /*
     to: backup path
-    libs: need copy files or dirs
-    zips: need zip dirs
-    ignores: ignore files or dirs
+    libs: need copy files or dirs | 需要拷贝的文件或文件夹
+    ignores: ignore files or dirs | 需要忽略拷贝的文件夹或文件夹
 
     if you use iCloud, set
     to: ~/Library/Mobile Documents/com~apple~CloudDocs/npmbackup/
+    
   */
 
-  to: '~/Desktop/npmbackupFiles',
+  to: '/Volumes/movedisk/npmbackup',
   libs: [
+    '~/work',
     '~/npmbackuprc.json',
     '~/.bash_profile',
     '~/.vimrc',
@@ -42,6 +43,7 @@ module.exports = {
     '~/Library/Preferences/com.binarynights.ForkLift-3.plist',
     '~/Library/Preferences/com.googlecode.iterm2.plist',
   ],
+  zips: ['*/.git'],
   ignores: [
     '*/.fseventsd',
     '*/.Spotlight-V100',

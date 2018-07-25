@@ -8,49 +8,14 @@ let allDirIgnores = [];
 let allFileIgnores = [];
 let rootDirIgnores = [];
 let rootFileIgnores = [];
+let rootZips = [];
 let rootPath;
 
-function mergeCopy({ fromPath = '', toPath = '', ignores }) {
+function mergeCopy({ fromPath = '', toPath = '', ignores, zips }) {
   if (ignores) {
-    for (let i = 0, l = ignores.length; i < l; i++) {
-      let ele = ignores[i] || '';
-      let isAllCheck = false;
-      if (ele.indexOf('*/') > -1) {
-        isAllCheck = true;
-      }
-      if (ele.indexOf('/') > -1 && ele.charAt(ele.length - 1) !== '/') {
-        isAllCheck = true;
-      }
-      if (ele.indexOf('/') > 0) {
-        isAllCheck = true;
-      }
-      if (isAllCheck) {
-        if (ele.charAt(ele.length - 1) === '/') {
-          ele = ele.replace('*/', '');
-          ele = ele.replace('**/', '');
-          ele = ele.substring(0, ele.length - 1);
-          allDirIgnores.push(ele);
-        } else {
-          ele = ele.replace('*/', '');
-          allFileIgnores.push(ele);
-          if (options.dirIgnoreSlash) {
-            allDirIgnores.push(ele);
-          }
-        }
-      } else {
-        if (ele.charAt(ele.length - 1) === '/') {
-          ele = ele.substring(0, ele.length - 1);
-          rootDirIgnores.push(ele);
-        } else {
-          rootFileIgnores.push(ele);
-          if (options.dirIgnoreSlash) {
-            rootDirIgnores.push(ele);
-          }
-        }
-      }
-    }
+    fixIgnoreArrays(ignores);
+    rootZips = zips;
   }
-
   let fromStat = null;
   let toStat = null;
   if (fse.existsSync(fromPath)) {
@@ -59,7 +24,7 @@ function mergeCopy({ fromPath = '', toPath = '', ignores }) {
   if (fse.existsSync(toPath)) {
     toStat = fse.lstatSync(toPath);
   }
-  if (isChangeNeedCopy(fromStat, toStat, fromPath, toPath)) {
+  if (isChangeNeedCopy(fromStat, toStat, fromPath, toPath, zips)) {
     const isRootDir = path.dirname(fromPath) === rootPath;
     if (fromStat.isDirectory()) {
       const checkIgnores = isRootDir ? rootDirIgnores : allDirIgnores;
@@ -101,6 +66,46 @@ function mergeCopy({ fromPath = '', toPath = '', ignores }) {
 
 // ---------------------------------------------------------------------------------
 
+function fixIgnoreArrays(ignores = []) {
+  for (let i = 0, l = ignores.length; i < l; i++) {
+    let ele = ignores[i] || '';
+    let isAllCheck = false;
+    if (ele.indexOf('*/') > -1) {
+      isAllCheck = true;
+    }
+    if (ele.indexOf('/') > -1 && ele.charAt(ele.length - 1) !== '/') {
+      isAllCheck = true;
+    }
+    if (ele.indexOf('/') > 0) {
+      isAllCheck = true;
+    }
+    if (isAllCheck) {
+      if (ele.charAt(ele.length - 1) === '/') {
+        ele = ele.replace('*/', '');
+        ele = ele.replace('**/', '');
+        ele = ele.substring(0, ele.length - 1);
+        allDirIgnores.push(ele);
+      } else {
+        ele = ele.replace('*/', '');
+        allFileIgnores.push(ele);
+        if (options.dirIgnoreSlash) {
+          allDirIgnores.push(ele);
+        }
+      }
+    } else {
+      if (ele.charAt(ele.length - 1) === '/') {
+        ele = ele.substring(0, ele.length - 1);
+        rootDirIgnores.push(ele);
+      } else {
+        rootFileIgnores.push(ele);
+        if (options.dirIgnoreSlash) {
+          rootDirIgnores.push(ele);
+        }
+      }
+    }
+  }
+}
+
 function isNeedIgnore(checkIgnores, fromPath) {
   let isNeedIgnore = false;
   let stat = fse.lstatSync(fromPath);
@@ -137,12 +142,22 @@ function isChangeNeedCopy(
     if (fromStat.isDirectory()) {
       if (options.isZipMiniFiles) {
         const files = fse.readdirSync(fromPath);
-        const equilSize = fromStat.size / files.length;
-        if (
-          equilSize < 2048 &&
-          files.length > 20 &&
-          fromStat.size < options.zipMaxDirSize // 10mb
-        ) {
+        let isNeedZipDir = false;
+        const baseNameOfFromPath = path.basename(toPath);
+        for (let i = 0, l = rootZips.length; i < l; i++) {
+          let ele = rootZips[i];
+          if (ele.indexOf('*/') > -1 || ele.indexOf('/') > 0) {
+            ele = ele.replace('*/', '');
+            if (baseNameOfFromPath === ele) {
+              isNeedZipDir = true;
+            }
+          } else {
+            if (rootPath === fromPath && baseNameOfFromPath === ele) {
+              isNeedZipDir = true;
+            }
+          }
+        }
+        if (isNeedZipDir) {
           needCopy = false;
           options.mergeFilesCount += 1;
           let mtimeTree = {};
@@ -151,14 +166,14 @@ function isChangeNeedCopy(
             const fileStat = fse.lstatSync(filePath);
             mtimeTree[filePath] = fileStat.mtimeMs;
           }
-          fse.writeFile(
-            toPath + options.suffixOfMtime,
-            JSON.stringify(mtimeTree),
-          );
           const zip = new jszip();
           archiveFilesToZip(zip, fromPath, toPath);
           zip.generateAsync({ type: 'uint8array' }).then(function(content) {
             fse.writeFileSync(toPath + options.suffixOfZip, content);
+            fse.writeFileSync(
+              toPath + options.suffixOfMtime,
+              JSON.stringify(mtimeTree),
+            );
           });
         } else {
           needCopy = true;

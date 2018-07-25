@@ -13,7 +13,6 @@ const options = {
   error: undefined,
   dirIgnoreSlash: true,
   isZipMiniFiles: true,
-  zipMaxDirSize: 1024 * 30,
   useMd5: true,
   mergeFilesCount: 0,
   suffixOfZip: '_npmbackup_.zip',

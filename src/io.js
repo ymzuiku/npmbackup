@@ -30,7 +30,7 @@ function loadBackuprc() {
   if (options.isUseDevelop) {
     rcUrl = path.resolve(__dirname, '../npmbackuprc/npmbackuprc-develop.js');
   }
-  let { to = '', libs = [], ignores = [] } = require(rcUrl);
+  let { to = '', libs = [], ignores = [], zips = [] } = require(rcUrl);
   to = to.replace('~', homedir);
   if (to.charAt(to.length - 1) !== '/') {
     to += '/';
@@ -41,7 +41,10 @@ function loadBackuprc() {
   for (let i = 0, l = ignores.length; i < l; i++) {
     ignores[i] = ignores[i].replace('~', homedir);
   }
-  return { to, libs, ignores };
+  for (let i = 0, l = zips.length; i < l; i++) {
+    zips[i] = zips[i].replace('~', homedir);
+  }
+  return { to, libs, ignores, zips };
 }
 
 function getPaths(val = '', to) {
@@ -78,7 +81,7 @@ function doInit(val) {
 }
 
 function doSave(val) {
-  const { libs, to, ignores } = loadBackuprc();
+  const { libs, to, ignores, zips } = loadBackuprc();
   realFunc.doSave = () => {
     libs.map(v => {
       let { fromPath, toPath } = getPaths(v, to);
@@ -86,13 +89,14 @@ function doSave(val) {
         fromPath,
         toPath,
         ignores,
+        zips,
       });
     });
   };
 }
 
 function doLoad(val) {
-  const { libs, to, ignores } = loadBackuprc();
+  const { libs, to, ignores, zips } = loadBackuprc();
   realFunc.doLoad = () => {
     libs.map(v => {
       let { fromPath, toPath } = getPaths(v, to);
@@ -100,6 +104,7 @@ function doLoad(val) {
         fromPath: toPath,
         toPath: fromPath,
         ignores,
+        zips,
       });
     });
   };

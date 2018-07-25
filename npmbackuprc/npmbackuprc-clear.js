@@ -1,12 +1,12 @@
 module.exports = {
   /*
     to: backup path
-    libs: need copy files or dirs | 需要拷贝的文件或文件夹
-    ignores: ignore files or dirs | 需要忽略拷贝的文件夹或文件夹
-
+    libs: need copy files or dirs
+    zips: need zip dirs
+    ignores: ignore files or dirs
+    
     if you use iCloud, set
     to: ~/Library/Mobile Documents/com~apple~CloudDocs/npmbackup/
-    
   */
 
   to: '~/Desktop/npmbackupFiles',
@@ -14,10 +14,17 @@ module.exports = {
     '~/npmbackuprc.json',
   ],
   ignores: [
-    '.fseventsd/',
-    '.Spotlight-V100/',
-    '.Trashes/',
-    '.DS_Store',
-    '._.*',
+    '*/.fseventsd',
+    '*/.Spotlight-V100',
+    '*/.Trashes',
+    '*/node_modules',
+    '*/build',
+    '*/.cache',
+    '*/.dist',
+    '*/dev-web',
+    '*/dev-wechat',
+    '*/.DS_Store',
+    '*/._.*',
+    '*/ffs_log',
   ],
 };
