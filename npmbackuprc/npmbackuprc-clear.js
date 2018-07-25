@@ -26,5 +26,6 @@ module.exports = {
     '*/.DS_Store',
     '*/._.*',
     '*/ffs_log',
+    '*/.sync.ffs_db',
   ],
 };

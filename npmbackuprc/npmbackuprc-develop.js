@@ -58,5 +58,12 @@ module.exports = {
     '*/._.*',
     '*/ffs_log',
     '*/.sync.ffs_db',
+    '*/Assets/AssetStoreTools',
+    '*/DerivedData',
+    '*/xcuserdata',
+    '/.meteor/local',
+    '*/iOSInjectionProject',
+    '*/.webpack_cache',
+    '*/nohup.out',
   ],
 };
