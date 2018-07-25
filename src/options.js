@@ -13,6 +13,9 @@ const options = {
   dirIgnoreSlash: true,
   isZipMiniFiles: true,
   useMd5: false,
+  mergeFilesCount: 0,
+  suffixOfZip: '_npmbackup_.zip',
+  suffixOfMtime: '_npmbackup_.mtime',
 };
 
 module.exports = options;

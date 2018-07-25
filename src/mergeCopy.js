@@ -3,6 +3,7 @@ const path = require('path');
 const md5 = require('blueimp-md5');
 const options = require('./options');
 const jszip = require('jszip');
+const unzip = require('unzip');
 let allDirIgnores = [];
 let allFileIgnores = [];
 let rootDirIgnores = [];
@@ -82,22 +83,33 @@ function mergeCopy({ fromPath = '', toPath = '', ignores }) {
       }
     } else if (fromStat.isFile()) {
       const checkIgnores = isRootDir ? rootFileIgnores : allFileIgnores;
-      if (isNeedIgnore(checkIgnores, fromPath) === false) {
+      const needInoreType = isNeedIgnore(checkIgnores, fromPath);
+      if (needInoreType === false) {
         if (options.isLogCopyFile === true) {
           console.log(fromPath);
         }
         fse.ensureDirSync(path.dirname(toPath));
         fse.copySync(fromPath, toPath);
+        options.mergeFilesCount += 1;
+      } else if (needInoreType === 'zip') {
+        const zip = new jszip();
+        archiveZipToFiles(zip, fromPath, toPath);
       }
     }
   }
 }
 
+// ---------------------------------------------------------------------------------
+
 function isNeedIgnore(checkIgnores, fromPath) {
   let isNeedIgnore = false;
   for (let i = 0, l = checkIgnores.length; i < l; i++) {
     const ele = checkIgnores[i];
-    if (ele.indexOf('/') > -1) {
+    if (fromPath.indexOf(options.suffixOfZip) > -1) {
+      isNeedIgnore = 'zip';
+    } else if (fromPath.indexOf(options.suffixOfMtime) > -1) {
+      isNeedIgnore = true;
+    } else if (ele.indexOf('/') > -1) {
       if (fromPath.indexOf(ele) > -1) {
         isNeedIgnore = true;
       }
@@ -128,6 +140,7 @@ function isChangeNeedCopy(
           fromStat.size < 1024 * 10 // 10mb
         ) {
           needCopy = false;
+          options.mergeFilesCount += 1;
           let mtimeTree = {};
           for (let i = 0, l = files.length; i < l; i++) {
             const filePath = fromPath + '/' + files[i];
@@ -135,13 +148,13 @@ function isChangeNeedCopy(
             mtimeTree[filePath] = fileStat.mtimeMs;
           }
           fse.writeFile(
-            toPath + '_npmbackup_mtime.json',
+            toPath + options.suffixOfMtime,
             JSON.stringify(mtimeTree),
           );
           const zip = new jszip();
           archiveFilesToZip(zip, fromPath, toPath);
           zip.generateAsync({ type: 'uint8array' }).then(function(content) {
-            fse.writeFileSync(toPath + '_npmbackup_uint.zip', content);
+            fse.writeFileSync(toPath + options.suffixOfZip, content);
           });
         } else {
           needCopy = true;
@@ -183,6 +196,13 @@ function archiveFilesToZip(zip = new jszip(), fromPath = '', toPath = '') {
       zip.file(files[i], fse.readFileSync(filePath));
     }
   }
+}
+
+function archiveZipToFiles(zip = new jszip(), fromPath = '', toPath = '') {
+  const toFiles = fse.readdirSync(toPath);
+  const mtimeFilePath = fromPath.replace(options.suffixOfZip, options.suffixOfMtime);
+  toPath = toPath.replace(options.suffixOfZip, '');
+  fse.createReadStream(fromPath).pipe(unzip.Extract({path: toPath}));
 }
 
 module.exports = mergeCopy;

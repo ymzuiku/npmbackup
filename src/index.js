@@ -52,5 +52,6 @@ if (options.error) {
   console.log('Sync files...')
   realFunc.doLoad();
   realFunc.doSave();
+  console.log(`merged ${options.mergeFilesCount} files`);
   console.timeEnd(`Done`);
 }
