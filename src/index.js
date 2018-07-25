@@ -14,7 +14,7 @@ const argv = process.argv.splice(2);
 for (let i = 0, l = argv.length; i < l; i++) {
   const ele = argv[i];
   // config
-  if (ele === '-s' || ele === '--source') {
+  if (ele === '-d' || ele === '--develop') {
     options.isUseDevelop = true;
   }
   if (ele === '-v' || ele === '--version') {

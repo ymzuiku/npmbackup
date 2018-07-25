@@ -30,7 +30,7 @@ function loadBackuprc() {
   if (options.isUseDevelop) {
     rcUrl = path.resolve(__dirname, '../npmbackuprc/npmbackuprc-develop.js');
   }
-  let { to, libs, ignores } = require(rcUrl);
+  let { to = '', libs = [], ignores = [] } = require(rcUrl);
   to = to.replace('~', homedir);
   if (to.charAt(to.length - 1) !== '/') {
     to += '/';

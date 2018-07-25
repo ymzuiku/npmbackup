@@ -2,7 +2,7 @@ const fse = require('fs-extra');
 const path = require('path');
 const md5 = require('blueimp-md5');
 const options = require('./options');
-
+const jszip = require('jszip');
 let allDirIgnores = [];
 let allFileIgnores = [];
 let rootDirIgnores = [];
@@ -119,15 +119,41 @@ function isChangeNeedCopy(
   let needCopy = false;
   if (fromStat) {
     if (fromStat.isDirectory()) {
-      needCopy = true;
-    } else if (!toStat) {
-      needCopy = true;
-    } else if (fromStat.ctimeMs > toStat.ctimeMs) {
-      // 这里补充用尺寸判断,大于某个尺寸的文件直接用尺寸,否则用md5
-      if (fromStat.size > 99) {
-        if (fromStat.size !== toStat.size) {
+      if (options.isZipMiniFiles) {
+        const files = fse.readdirSync(fromPath);
+        const equilSize = fromStat.size / files.length;
+        if (
+          equilSize < 2048 &&
+          files.length > 20 &&
+          fromStat.size < 1024 * 10 // 10mb
+        ) {
+          needCopy = false;
+          let mtimeTree = {};
+          for (let i = 0, l = files.length; i < l; i++) {
+            const filePath = fromPath + '/' + files[i];
+            const fileStat = fse.lstatSync(filePath);
+            mtimeTree[filePath] = fileStat.mtimeMs;
+          }
+          fse.writeFile(
+            toPath + '_npmbackup_mtime.json',
+            JSON.stringify(mtimeTree),
+          );
+          const zip = new jszip();
+          archiveFilesToZip(zip, fromPath, toPath);
+          zip.generateAsync({ type: 'uint8array' }).then(function(content) {
+            fse.writeFileSync(toPath + '_npmbackup_uint.zip', content);
+          });
+        } else {
           needCopy = true;
         }
+      } else {
+        needCopy = true;
+      }
+    } else if (!toStat) {
+      needCopy = true;
+    } else if (fromStat.mtimeMs > toStat.mtimeMs) {
+      if (fromStat.size > 4096) {
+        needCopy = fromStat.size !== toStat.size;
       } else if (options.useMd5) {
         if (fromStat.isFile()) {
           let fromData = fse.readFileSync(fromPath);
@@ -140,6 +166,23 @@ function isChangeNeedCopy(
     }
   }
   return needCopy;
+}
+
+function archiveFilesToZip(zip = new jszip(), fromPath = '', toPath = '') {
+  const files = fse.readdirSync(fromPath);
+  for (let i = 0, l = files.length; i < l; i++) {
+    const filePath = fromPath + '/' + files[i];
+    const fileStat = fse.lstatSync(filePath);
+    if (fileStat.isDirectory()) {
+      archiveFilesToZip(
+        zip.folder(files[i]),
+        filePath,
+        toPath + '/' + files[i],
+      );
+    } else {
+      zip.file(files[i], fse.readFileSync(filePath));
+    }
+  }
 }
 
 module.exports = mergeCopy;
