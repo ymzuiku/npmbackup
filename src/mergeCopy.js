@@ -200,6 +200,11 @@ function archiveFilesToZip(zip = new jszip(), fromPath = '', toPath = '') {
 
 function archiveZipToFiles(zip = new jszip(), fromPath = '', toPath = '') {
   const toFiles = fse.readdirSync(toPath);
+  const isIgnoreCopy = true;
+  for (let i = 0, l = toFiles.length; i < l; i++) {
+    const ele = toFiles[i];
+    ele.replace()
+  }
   const mtimeFilePath = fromPath.replace(options.suffixOfZip, options.suffixOfMtime);
   toPath = toPath.replace(options.suffixOfZip, '');
   fse.createReadStream(fromPath).pipe(unzip.Extract({path: toPath}));
