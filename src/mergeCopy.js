@@ -137,7 +137,7 @@ function isChangeNeedCopy(
         if (
           equilSize < 2048 &&
           files.length > 20 &&
-          fromStat.size < 1024 * 10 // 10mb
+          fromStat.size < options.zipMaxDirSize // 10mb
         ) {
           needCopy = false;
           options.mergeFilesCount += 1;
@@ -164,8 +164,8 @@ function isChangeNeedCopy(
       }
     } else if (!toStat) {
       needCopy = true;
-    } else if (fromStat.mtimeMs > toStat.mtimeMs) {
-      if (fromStat.size > 4096) {
+    } else if (fromStat.mtimeMs > toStat.mtimeMs + options.chekcTimeout) {
+      if (fromStat.size > 8192) {
         needCopy = fromStat.size !== toStat.size;
       } else if (options.useMd5) {
         if (fromStat.isFile()) {
@@ -199,15 +199,31 @@ function archiveFilesToZip(zip = new jszip(), fromPath = '', toPath = '') {
 }
 
 function archiveZipToFiles(zip = new jszip(), fromPath = '', toPath = '') {
-  const toFiles = fse.readdirSync(toPath);
-  const isIgnoreCopy = true;
-  for (let i = 0, l = toFiles.length; i < l; i++) {
-    const ele = toFiles[i];
-    ele.replace()
-  }
-  const mtimeFilePath = fromPath.replace(options.suffixOfZip, options.suffixOfMtime);
+  let isNeedExpZip = false;
+  const mtimeFilePath = fromPath.replace(
+    options.suffixOfZip,
+    options.suffixOfMtime,
+  );
+  let mtimeTree = fse.readFileSync(mtimeFilePath, { encoding: 'utf8' });
+  mtimeTree = mtimeTree && JSON.parse(mtimeTree);
   toPath = toPath.replace(options.suffixOfZip, '');
-  fse.createReadStream(fromPath).pipe(unzip.Extract({path: toPath}));
+  if (fse.existsSync(toPath)) {
+    const toFiles = fse.readdirSync(toPath);
+    for (let i = 0, l = toFiles.length; i < l; i++) {
+      const ele = toFiles[i];
+      const fileStat = fse.lstatSync(toPath + '/' + ele);
+      if (fileStat.mtimeMs > mtimeTree[toPath + '/' + ele] + options.chekcTimeout) {
+        mtimeTree[toPath + '/' + ele] = fileStat.mtimeMs;
+        isNeedExpZip = true;
+      }
+    }
+  } else {
+    isNeedExpZip = true;
+  }
+  if (isNeedExpZip) {
+    fse.writeFileSync(mtimeFilePath, JSON.stringify(mtimeTree));
+    fse.createReadStream(fromPath).pipe(unzip.Extract({ path: toPath }));
+  }
 }
 
 module.exports = mergeCopy;
