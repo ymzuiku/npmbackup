@@ -103,6 +103,10 @@ function mergeCopy({ fromPath = '', toPath = '', ignores }) {
 
 function isNeedIgnore(checkIgnores, fromPath) {
   let isNeedIgnore = false;
+  let stat = fse.lstatSync(fromPath);
+  if (stat.isFile() === false && stat.isDirectory() === false) {
+    return true;
+  }
   for (let i = 0, l = checkIgnores.length; i < l; i++) {
     const ele = checkIgnores[i];
     if (fromPath.indexOf(options.suffixOfZip) > -1) {
@@ -187,13 +191,17 @@ function archiveFilesToZip(zip = new jszip(), fromPath = '', toPath = '') {
     const filePath = fromPath + '/' + files[i];
     const fileStat = fse.lstatSync(filePath);
     if (fileStat.isDirectory()) {
-      archiveFilesToZip(
-        zip.folder(files[i]),
-        filePath,
-        toPath + '/' + files[i],
-      );
+      if (isNeedIgnore(allDirIgnores, filePath) === false) {
+        archiveFilesToZip(
+          zip.folder(files[i]),
+          filePath,
+          toPath + '/' + files[i],
+        );
+      }
     } else {
-      zip.file(files[i], fse.readFileSync(filePath));
+      if (isNeedIgnore(allFileIgnores, filePath) === false) {
+        zip.file(files[i], fse.readFileSync(filePath));
+      }
     }
   }
 }
@@ -212,7 +220,10 @@ function archiveZipToFiles(zip = new jszip(), fromPath = '', toPath = '') {
     for (let i = 0, l = toFiles.length; i < l; i++) {
       const ele = toFiles[i];
       const fileStat = fse.lstatSync(toPath + '/' + ele);
-      if (fileStat.mtimeMs > mtimeTree[toPath + '/' + ele] + options.chekcTimeout) {
+      if (
+        fileStat.mtimeMs >
+        mtimeTree[toPath + '/' + ele] + options.chekcTimeout
+      ) {
         mtimeTree[toPath + '/' + ele] = fileStat.mtimeMs;
         isNeedExpZip = true;
       }
