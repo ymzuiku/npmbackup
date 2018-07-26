@@ -12,7 +12,7 @@ const options = {
   chekcTimeout: 6000,
   error: undefined,
   dirIgnoreSlash: true,
-  isZipMiniFiles: false,
+  isZipMiniFiles: true,
   useMd5: true,
   mergeFilesCount: 0,
   suffixOfZip: '_npmbackup_.zip',
