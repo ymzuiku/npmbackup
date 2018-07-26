@@ -12,17 +12,19 @@
 - npmbackup使用的是最原始的拷贝，会比对文件变化，只拷贝差异的文件，以适应所有状况
 - 可以使用ignore列表，忽略一些子文件
 - 可以使用zips列表，把一些碎文件进行压缩，使用时自动解压缩
+- 支持使用Tag管理多份备份
 
 ## Api
 
 ### **初始化配置文件**
 
+使用作者预先配置好的配置文件
 ```shell
-$ npmbackup init sample
+$ npmbackup init
 ```
-或者使用作者预先配置好的配置文件
+或者使用空白的配置
 ```shell
-$ npmbackup init all
+$ npmbackup init clear
 ```
 ### **编辑需要备份的文件**
 打开 `~/nombackup.js` ，添加自己需要的文件，和指定备份的路径(默认路径设置在 `iCloud/npmbackup` )
