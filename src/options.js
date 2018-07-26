@@ -1,6 +1,6 @@
 /*
 * @Author: ym 
-* @Date: 2018-02-15 15:26:28 
+* @Date: 2018-02-17 15:26:28
  * @Last Modified by: ym
  * @Last Modified time: 2018-02-16 13:42:50
  */
@@ -12,8 +12,8 @@ const options = {
   chekcTimeout: 6000,
   error: undefined,
   dirIgnoreSlash: true,
-  isZipMiniFiles: true,
-  useMd5: true,
+  isZipMiniFiles: false,
+  useMd5: false,
   mergeFilesCount: 0,
   suffixOfZip: '_npmbackup_.zip',
   suffixOfMtime: '_npmbackup_.mtime',
