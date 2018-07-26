@@ -6,9 +6,12 @@
 ### mackup 
 - mackup 是非常有效率的，使用 link 把配置文件链接到某个路径，以达到实时备份项目配置的目的
 - 但是有一些应用不支持读取 link 内的文件，例如 Affinity Designer、vscode 的插件文件夹等等
+- 使用link无法忽略一些文件夹，例如node_modules等不需要被上传至网盘的文件
 
-### npmbackup 
-npmbackup使用的是最原始的拷贝，以适应所有状况
+### Feature 
+- npmbackup使用的是最原始的拷贝，会比对文件变化，只拷贝差异的文件，以适应所有状况
+- 可以使用ignore列表，忽略一些子文件
+- 可以使用zips列表，把一些碎文件进行压缩，使用时自动解压缩
 
 ## Api
 
@@ -45,7 +48,7 @@ $ npmbackup load
   $ npmbackup --tag my-loves load
 ```
 
-如果没有设置`--tag`,默认的tag是`defalut`
+如果没有设置`--tag`,默认的tag是`default`
 
 
 

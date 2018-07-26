@@ -4,12 +4,9 @@ module.exports = {
     libs: need copy files or dirs
     zips: need zip dirs
     ignores: ignore files or dirs
-
-    if you use iCloud, set
-    to: ~/Library/Mobile Documents/com~apple~CloudDocs/npmbackup/
   */
 
-  to: '~/Desktop/npmbackupFiles',
+  to: '~/Library/Mobile Documents/com~apple~CloudDocs/npmbackup/',
   libs: [
     '~/npmbackuprc.json',
     '~/.bash_profile',
