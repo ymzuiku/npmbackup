@@ -1,6 +1,6 @@
 {
   "name": "npmbackup",
-  "version": "0.0.10",
+  "version": "0.1.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
@@ -13,6 +13,6 @@
     "unzip": "^0.1.11"
   },
   "bin": {
-    "npmbackup": "src/index.js"
+    "npmbackup": "src/ci.js"
   }
 }
