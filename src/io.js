@@ -90,6 +90,7 @@ function doSave(val) {
         toPath,
         ignores,
         zips,
+        type:'save',
       });
     });
   };
@@ -105,6 +106,7 @@ function doLoad(val) {
         toPath: fromPath,
         ignores,
         zips,
+        type:'load',
       });
     });
   };

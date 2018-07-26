@@ -13,10 +13,12 @@ const options = {
   error: undefined,
   dirIgnoreSlash: true,
   isZipMiniFiles: false,
-  useMd5: false,
+  useMd5: true,
   mergeFilesCount: 0,
   suffixOfZip: '_npmbackup_.zip',
   suffixOfMtime: '_npmbackup_.mtime',
+  isSaveFocus: false,
+  isLoadFocus: true,
 };
 
 module.exports = options;

@@ -10,11 +10,13 @@ let rootDirIgnores = [];
 let rootFileIgnores = [];
 let rootZips = [];
 let rootPath;
+let rootType;
 
-function mergeCopy({ fromPath = '', toPath = '', ignores, zips }) {
+function mergeCopy({ fromPath = '', toPath = '', ignores, zips, type }) {
   if (ignores) {
     fixIgnoreArrays(ignores);
     rootZips = zips;
+    rootType = type;
   }
   let fromStat = null;
   let toStat = null;
@@ -183,17 +185,35 @@ function isChangeNeedCopy(
       }
     } else if (!toStat) {
       needCopy = true;
-    } else if (fromStat.mtimeMs > toStat.mtimeMs + options.chekcTimeout) {
-      if (fromStat.size > 8192) {
-        needCopy = fromStat.size !== toStat.size;
-      } else if (options.useMd5) {
-        if (fromStat.isFile()) {
-          let fromData = fse.readFileSync(fromPath);
-          let toData = fse.readFileSync(toPath);
-          needCopy = md5(fromData) !== md5(toData);
+    } else {
+      let isTimeCheckNeedCopy = false;
+      let isFouceCopy =
+        rootType === 'save' ? options.isSaveFocus : options.isLoadFocus;
+      if (isFouceCopy === false) {
+        if (fromStat.mtimeMs > toStat.mtimeMs) {
+          isTimeCheckNeedCopy = true;
         }
       } else {
-        needCopy = true;
+        if (fromStat.mtimeMs !== toStat.mtimeMs) {
+          isTimeCheckNeedCopy = true;
+        }
+      }
+      if (isTimeCheckNeedCopy) {
+        // 计算是否拷贝
+        if (fromStat.size > 8192) {
+          needCopy = fromStat.size !== toStat.size;
+          if (needCopy) {
+            console.log(fromStat.size, toStat.size, needCopy);
+          }
+        } else if (options.useMd5) {
+          if (fromStat.isFile()) {
+            let fromData = fse.readFileSync(fromPath);
+            let toData = fse.readFileSync(toPath);
+            needCopy = md5(fromData) !== md5(toData);
+          }
+        } else {
+          needCopy = true;
+        }
       }
     }
   }
