@@ -1,7 +1,7 @@
 {
   "name": "npmbackup",
-  "version": "0.1.3",
-  "main": "index.js",
+  "version": "0.1.4",
+  "main": "src/index.js",
   "license": "MIT",
   "scripts": {
     "start": "node index.js"
